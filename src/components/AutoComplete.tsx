@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import { AxiosResponse } from 'axios';
 
 // https://docs.github.com/en/rest/search#search-users
 // https://api.github.com/search/users
@@ -32,9 +33,8 @@ export const AutoComplete = () => {
   const [search, setSearch] = useState<string>('')
   const [fetchedData, setFetchedData] = useState<Array<any>>([])
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [error, setError] = useState<string | null>(null)
   const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)
-
 
   //Fetching data
   const fetch = async (_search: string, pageLimit: number = 50) => {
@@ -44,12 +44,26 @@ export const AutoComplete = () => {
       return;
     };
 
-    const [users, repos] = await Promise.allSettled([
-      axios.get(`https://api.github.com/search/users?q=${_search}&per_page=${pageLimit}`),
-      axios.get(`https://api.github.com/search/repositories?q=${_search}&per_page=${pageLimit}`)
-    ]) as { status: 'fulfilled' | 'rejected', value: any }[];
+    setLoading(true)
 
-    setFetchedData([...users.value.data.items, ...repos.value.data.items].sort())
+    const [users, repos] = await Promise.all([
+      axios.get(`https://api.github.com/search/users?q=${_search}&per_page=${pageLimit}`).catch(x => x.response as AxiosResponse),
+      axios.get(`https://api.github.com/search/repositories?q=${_search}&per_page=${pageLimit}`).catch(x => x.response as AxiosResponse)
+    ]);
+
+    setLoading(false)
+
+    if(users.status === 403 || repos.status === 403){
+      setError('API rate limit exceeded')
+      return
+    }
+    else if(users.status !== 200 || repos.status !== 200){
+      setError('Error fetching the data')
+      return
+    }
+
+    setError(null)
+    setFetchedData([...users.data.items, ...repos.data.items].sort())
   }
   //
 
@@ -63,21 +77,24 @@ export const AutoComplete = () => {
       <input
         type='text'
         placeholder='Search for Github users &#38; repos'
-        className='w-[500px] h-9 border-2 pl-2 mt-16 outline-none rounded border-gray-400 focus-visible:border-gray-800'
+        className='w-[500px] h-9 border-[1px] pl-2 mt-16 outline-none rounded border-gray-400 focus-visible:border-gray-800'
         value={search}
         onChange={handleChangeSearch}
       />
 
       { fetchedData.length > 0 && 
-        <div className='absolute w-full h-52 overflow-hidden overflow-y-scroll shadow-2xl rounded'>
-          {fetchedData.map((results, idx) => (
-            <div key={idx} className='mx-3 py-3 border-b-2 last:border-b-0 border-border-gray-400 hover:text-gray-400'>
-              <a href={results.html_url}  target='_blank' rel="noopener noreferrer" className="w-full">
-                {results.login ?? results.full_name}
-              </a>
-            </div>
-
-          ))}
+        <div className={`absolute w-full overflow-hidden ${error ?? 'h-52 overflow-y-scroll'} shadow-2xl rounded border-[1px] border-gray-200`}>
+          {
+            error 
+            ? <div className='mx-3 py-3'> {error} </div>
+            : fetchedData.map((results, idx) => (
+              <div key={idx} className='mx-3 py-3 border-b-2 last:border-b-0 border-border-gray-400 hover:text-gray-400'>
+                <a href={results.html_url}  target='_blank' rel="noopener noreferrer" className="w-full">
+                  {results.login ?? results.full_name}
+                </a>
+              </div>
+            ))
+          }
         </div>
       }
 
