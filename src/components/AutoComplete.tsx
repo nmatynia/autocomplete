@@ -19,10 +19,10 @@ import { AxiosResponse } from 'axios';
 // - The solution should also display a meaningful snippet of your ability to test the code.
 
 //NOTES
-// 403 is bugging the app try doing something with it
+// 403 is bugging the app try doing something with it - DONE
 // Make repos alphabetically higher (delete ../.. from repos name (?))
 // Make using arrow a thing
-// Loading icon 
+// Loading icon - DONE
 // Add user photo? Repos / Info ?
 // Change 'a' tag placement and its style on hover, focus
 // Clicking outside is closing the dropdown
@@ -40,6 +40,7 @@ export const AutoComplete = () => {
   const fetch = async (_search: string, pageLimit: number = 50) => {
 
     if (_search.length < 3) {
+      setError(null)
       setFetchedData([]); 
       return;
     };
@@ -82,12 +83,12 @@ export const AutoComplete = () => {
         onChange={handleChangeSearch}
       />
 
-      { fetchedData.length > 0 && 
-        <div className={`absolute w-full overflow-hidden ${error ?? 'h-52 overflow-y-scroll'} shadow-2xl rounded border-[1px] border-gray-200`}>
-          {
-            error 
-            ? <div className='mx-3 py-3'> {error} </div>
-            : fetchedData.map((results, idx) => (
+      { (fetchedData.length > 0 || loading || error) && 
+        <div className={`absolute ${(loading || error) ? 'flex justify-center items-center' : 'overflow-y-scroll '} w-full h-auto max-h-52 overflow-hidden shadow-2xl rounded border-[1px] border-gray-200`}>
+          {loading && <LoadingIcon/>}
+          {!loading && error && <div className='mx-3 py-3'> {error} </div>}
+          {!loading && !error && 
+            fetchedData.map((results, idx) => (
               <div key={idx} className='mx-3 py-3 border-b-2 last:border-b-0 border-border-gray-400 hover:text-gray-400'>
                 <a href={results.html_url}  target='_blank' rel="noopener noreferrer" className="w-full">
                   {results.login ?? results.full_name}
@@ -101,3 +102,10 @@ export const AutoComplete = () => {
     </div>
   )
 }
+
+export const LoadingIcon = () => {
+  return (
+    <div className='w-8 h-8 m-2 border-4 border-t-gray-700 rounded-full animate-spin'></div>
+  )
+}
+
