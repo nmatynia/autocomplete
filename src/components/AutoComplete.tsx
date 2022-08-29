@@ -18,6 +18,7 @@ import { AxiosResponse } from 'axios';
 //NOTES
 // Scroll behaviour
 // E2E tests
+// New Regex for searching alphabetically.
 
 export const AutoComplete = () => {
 
@@ -51,13 +52,21 @@ export const AutoComplete = () => {
   //
 
   //Arrows, enter, backspace actions 
-  const [cursor, setCursor] = useState<number>(-1)
+  const [cursor, setCursor] = useState<number>(-1);
+  const [deviceMode, setDeviceMode] = useState<boolean>(true); // True means that we are using mouse, false that we switched to keyboard control
 
+  const handleOnMouseMove = () => setDeviceMode(true);
+  const handleOnMouseEnter = (idx: number) => {
+    if(deviceMode) return () => setCursor(idx);
+  };
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+
+    setDeviceMode(false)
+
     if (e.key === 'ArrowUp' && cursor > 0) {
       setCursor(prevCursor => prevCursor - 1)
-
-    } else if (e.key === 'ArrowDown' && cursor < fetchedData.length - 1) {
+    } 
+    else if (e.key === 'ArrowDown' && cursor < fetchedData.length - 1) {
       setCursor(prevCursor => prevCursor + 1)
     }
     else if (e.key === 'Enter') {
@@ -144,7 +153,10 @@ export const AutoComplete = () => {
       />
 
       {open &&
-        <div className={`absolute ${(loading || error) ? 'flex justify-center items-center' : 'overflow-y-scroll '} w-full h-auto max-h-52 overflow-hidden shadow-2xl rounded border-[1px] border-gray-200`}>
+        <div 
+          onMouseMove={handleOnMouseMove}
+          className={`absolute ${(loading || error) ? 'flex justify-center items-center' : 'overflow-y-scroll '} w-full h-auto max-h-52 overflow-hidden shadow-2xl rounded border-[1px] border-gray-200`}
+        >
           {loading && <LoadingIcon />}
           {!loading && error && <div className='mx-3 py-3'> {error} </div>}
           {!loading && !error &&
@@ -153,7 +165,7 @@ export const AutoComplete = () => {
                 key={idx}
                 id={'item-' + idx}
                 className={`p-3 border-b-[1px] last:border-b-0 border-border-gray-400 ${cursor === idx ? 'bg-blue-100' : ''}`}
-                onMouseEnter={() => setCursor(idx)}
+                onMouseEnter={handleOnMouseEnter(idx)}
               >
                 <a
                   href={results.html_url}
