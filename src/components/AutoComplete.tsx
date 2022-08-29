@@ -2,9 +2,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { AxiosResponse } from 'axios';
 
-// https://docs.github.com/en/rest/search#search-users
-// https://api.github.com/search/users
-
 //TODO
 // - Minimal chars number to initialize search: 3. - DONE
 
@@ -20,10 +17,11 @@ import { AxiosResponse } from 'axios';
 
 //NOTES
 // Stroke on searched phrase ?
-//change search when changing cursor !
+// Scroll behaviour
+// E2E tests
 
 export const AutoComplete = () => {
-  
+
   const [search, setSearch] = useState<string>('')
   const [fetchedData, setFetchedData] = useState<Array<any>>([])
 
@@ -32,22 +30,22 @@ export const AutoComplete = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [open,setOpen] = useState<boolean>(fetchedData.length > 0 || loading || !!error);
+  const [open, setOpen] = useState<boolean>(fetchedData.length > 0 || loading || !!error);
   const handleClickInput = () => setOpen(true);
 
   //Click out of the component closes the dropdown
   const clickOutsideRef = useRef<any>();
 
-  useEffect(()=>{
-    const closeDropdown = (e:any) =>{
-        if(!clickOutsideRef.current.contains(e.target)){
-            setOpen(false)
-        }
+  useEffect(() => {
+    const closeDropdown = (e: any) => {
+      if (!clickOutsideRef.current.contains(e.target)) {
+        setOpen(false)
+      }
     }
-    document.body.addEventListener('mousedown',closeDropdown);
+    document.body.addEventListener('mousedown', closeDropdown);
 
-    return () => document.body.removeEventListener('mousedown',closeDropdown)
-  },[])
+    return () => document.body.removeEventListener('mousedown', closeDropdown)
+  }, [])
   //
 
   //Arrows, enter, backspace actions 
@@ -63,14 +61,16 @@ export const AutoComplete = () => {
     else if (e.key === 'Enter') {
       window.open(fetchedData[cursor].html_url, '_blank');
     }
-    else if(e.key === 'Backspace'){
+    else if (e.key === 'Backspace') {
+      if (cursor === -1) return;
+      setSearch(fetchedData[cursor].login ?? fetchedData[cursor].name)
       setCursor(-1)
     }
 
     document.getElementById('item-' + cursor)?.scrollIntoView({ block: "center" });
   }
   //
- 
+
 
   // Function passed into sort() so the object can be sorted alphabetically
   const compare = (a: any, b: any) => {
