@@ -16,7 +16,6 @@ import { AxiosResponse } from 'axios';
 // - The solution should also display a meaningful snippet of your ability to test the code.
 
 //NOTES
-// Scroll behaviour
 // E2E tests
 // New Regex for searching alphabetically.
 
@@ -98,6 +97,13 @@ export const AutoComplete = () => {
     return 0;
   }
   //
+  
+  //Filter results so only the starting one will display
+  const filterStartingWithSearch = (items: Array<any>) =>{
+    const regex: RegExp = new RegExp('^' + search)
+    return items.filter(item => item.login ? !!(item.login.match(regex)) : !!(item.name.match(regex)))
+  }
+  //
 
   //Fetching data
   const fetch = async (_search: string, pageLimit: number = 50) => {
@@ -131,7 +137,9 @@ export const AutoComplete = () => {
     }
 
     setError(null)
-    setFetchedData([...users.data.items, ...repos.data.items].sort(compare))
+    console.log([...users.data.items, ...repos.data.items])
+    setFetchedData(filterStartingWithSearch([...users.data.items, ...repos.data.items]).sort(compare))
+    console.log(fetchedData)
   }
   //
 
