@@ -12,7 +12,7 @@ import { AxiosResponse } from 'axios';
 
 // - Number of result items should be limited to 50 per request. - DONE
 
-// - The component should give visual feedback for when the data is being fetched, the results are empty, or the request resulted in an error.
+// - The component should give visual feedback for when the data is being fetched, the results are empty, or the request resulted in an error. - DONE
 
 // - The component supports keyboard strokes (up and down arrows to browse the results, enter to open a new tab with the repository/user page).
 
@@ -20,7 +20,7 @@ import { AxiosResponse } from 'axios';
 
 //NOTES
 // 403 is bugging the app try doing something with it - DONE
-// Make repos alphabetically higher (delete ../.. from repos name (?))
+// Repair sort() - https://www.javascripttutorial.net/array/javascript-sort-an-array-of-objects/
 // Make using arrow a thing
 // Loading icon - DONE
 // Add user photo? Repos / Info ?
@@ -41,7 +41,7 @@ export const AutoComplete = () => {
 
     if (_search.length < 3) {
       setError(null)
-      setFetchedData([]); 
+      setFetchedData([]);
       return;
     };
 
@@ -54,12 +54,16 @@ export const AutoComplete = () => {
 
     setLoading(false)
 
-    if(users.status === 403 || repos.status === 403){
+    if (users.status === 403 || repos.status === 403) {
       setError('API rate limit exceeded')
       return
     }
-    else if(users.status !== 200 || repos.status !== 200){
+    else if (users.status !== 200 || repos.status !== 200) {
       setError('Error fetching the data')
+      return
+    }
+    else if ([...users.data.items, ...repos.data.items].length === 0) {
+      setError('No user or repository exists')
       return
     }
 
@@ -83,16 +87,27 @@ export const AutoComplete = () => {
         onChange={handleChangeSearch}
       />
 
-      { (fetchedData.length > 0 || loading || error) && 
+      {(fetchedData.length > 0 || loading || error) &&
         <div className={`absolute ${(loading || error) ? 'flex justify-center items-center' : 'overflow-y-scroll '} w-full h-auto max-h-52 overflow-hidden shadow-2xl rounded border-[1px] border-gray-200`}>
-          {loading && <LoadingIcon/>}
+          {loading && <LoadingIcon />}
           {!loading && error && <div className='mx-3 py-3'> {error} </div>}
-          {!loading && !error && 
+          {!loading && !error &&
             fetchedData.map((results, idx) => (
               <div key={idx} className='mx-3 py-3 border-b-2 last:border-b-0 border-border-gray-400 hover:text-gray-400'>
-                <a href={results.html_url}  target='_blank' rel="noopener noreferrer" className="w-full">
-                  {results.login ?? results.full_name}
-                </a>
+                {results.login ?
+                  <a href={results.html_url} target='_blank' rel='noopener noreferrer' className='w-full flex items-center'>
+                    <img src={results.avatar_url} alt="avatar" className='h-8 mr-4' />
+                    <p>{results.login}</p>
+                    
+                  </a>
+                  :
+                  <a href={results.html_url} target='_blank' rel='noopener noreferrer' className="w-full flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" className='w-8 mr-4 fill-gray-500'>
+                      <path fillRule="evenodd" d="M3 2.75A2.75 2.75 0 015.75 0h14.5a.75.75 0 01.75.75v20.5a.75.75 0 01-.75.75h-6a.75.75 0 010-1.5h5.25v-4H6A1.5 1.5 0 004.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 01-.6 1.374A3.25 3.25 0 013 18.75v-16zM19.5 1.5V15H6c-.546 0-1.059.146-1.5.401V2.75c0-.69.56-1.25 1.25-1.25H19.5z"></path><path d="M7 18.25a.25.25 0 01.25-.25h5a.25.25 0 01.25.25v5.01a.25.25 0 01-.397.201l-2.206-1.604a.25.25 0 00-.294 0L7.397 23.46a.25.25 0 01-.397-.2v-5.01z"></path>
+                    </svg>
+                    <p>{results.name}</p>
+                  </a>
+                }
               </div>
             ))
           }
