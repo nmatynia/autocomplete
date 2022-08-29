@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { AxiosResponse } from 'axios';
 
@@ -19,45 +19,68 @@ import { AxiosResponse } from 'axios';
 // - The solution should also display a meaningful snippet of your ability to test the code.
 
 //NOTES
-// Change 'a' tag placement and its style on hover, focus
-// Clicking outside is closing the dropdown
-// Stroke on searched phrase ? 
-// Make items the same height
-// Improve scroll?
-// Responsive width
+// Stroke on searched phrase ?
+//change search when changing cursor !
 
 export const AutoComplete = () => {
-
+  
   const [search, setSearch] = useState<string>('')
   const [fetchedData, setFetchedData] = useState<Array<any>>([])
+
+  const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)
 
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [open,setOpen] = useState<boolean>(fetchedData.length > 0 || loading || !!error);
+  const handleClickInput = () => setOpen(true);
+
+  //Click out of the component closes the dropdown
+  const clickOutsideRef = useRef<any>();
+
+  useEffect(()=>{
+    const closeDropdown = (e:any) =>{
+        if(!clickOutsideRef.current.contains(e.target)){
+            setOpen(false)
+        }
+    }
+    document.body.addEventListener('mousedown',closeDropdown);
+
+    return () => document.body.removeEventListener('mousedown',closeDropdown)
+  },[])
+  //
+
+  //Arrows, enter, backspace actions 
   const [cursor, setCursor] = useState<number>(-1)
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) =>{
-    
-    // arrow up/down button should select next/previous list element
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.key === 'ArrowUp' && cursor > 0) {
       setCursor(prevCursor => prevCursor - 1)
 
     } else if (e.key === 'ArrowDown' && cursor < fetchedData.length - 1) {
       setCursor(prevCursor => prevCursor + 1)
     }
-    document.getElementById('item-'+cursor)?.scrollIntoView({block: "center"});
+    else if (e.key === 'Enter') {
+      window.open(fetchedData[cursor].html_url, '_blank');
+    }
+    else if(e.key === 'Backspace'){
+      setCursor(-1)
+    }
+
+    document.getElementById('item-' + cursor)?.scrollIntoView({ block: "center" });
   }
-  const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)
+  //
+ 
 
   // Function passed into sort() so the object can be sorted alphabetically
-  const compare = (a:any, b:any) => {
+  const compare = (a: any, b: any) => {
     const _a = ((a.login ?? a.name) as string).toLowerCase()
     const _b = ((b.login ?? b.name) as string).toLowerCase()
-    
-    if ( _a < _b ){
+
+    if (_a < _b) {
       return -1;
     }
-    if ( _a > _b ){
+    if (_a > _b) {
       return 1;
     }
     return 0;
@@ -106,41 +129,48 @@ export const AutoComplete = () => {
 
 
   return (
-    <div className="relative">
+    <div className="relative" ref={clickOutsideRef}>
       <input
         type='text'
         placeholder='Search for Github users &#38; repos'
-        className='w-[500px] h-9 border-[1px] pl-2 mt-16 outline-none rounded border-gray-400 focus-visible:border-gray-800'
-        value={cursor !== -1 ? (fetchedData[cursor].login ?? fetchedData[cursor].name)  : search}
-        onKeyDown={ handleKeyDown }
+        className='w-[80vw] max-w-[500px] h-9 border-[1px] pl-2 mt-16 outline-none rounded border-gray-400 focus-visible:border-gray-800'
+        value={cursor !== -1 ? (fetchedData[cursor].login ?? fetchedData[cursor].name) : search}
+        onKeyDown={handleKeyDown}
         onChange={handleChangeSearch}
+        onClick={handleClickInput}
       />
 
-      {(fetchedData.length > 0 || loading || error) &&
+      {open &&
         <div className={`absolute ${(loading || error) ? 'flex justify-center items-center' : 'overflow-y-scroll '} w-full h-auto max-h-52 overflow-hidden shadow-2xl rounded border-[1px] border-gray-200`}>
           {loading && <LoadingIcon />}
           {!loading && error && <div className='mx-3 py-3'> {error} </div>}
           {!loading && !error &&
             fetchedData.map((results, idx) => (
-              <div 
+              <div
                 key={idx}
-                id={'item-'+idx}
-                className={`mx-3 py-3 border-b-2 last:border-b-0 border-border-gray-400 hover:text-gray-400 ${cursor === idx ? 'bg-blue-100' : ''}`}
+                id={'item-' + idx}
+                className={`p-3 border-b-[1px] last:border-b-0 border-border-gray-400 ${cursor === idx ? 'bg-blue-100' : ''}`}
                 onMouseEnter={() => setCursor(idx)}
               >
-                {results.login ?
-                  <a href={results.html_url} target='_blank' rel='noopener noreferrer' className='w-full flex items-center'>
-                    <img src={results.avatar_url} alt="avatar" className='h-8 mr-4' />
-                    <p>{results.login}</p>
-                  </a>
-                  :
-                  <a href={results.html_url} target='_blank' rel='noopener noreferrer' className="w-full flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='w-6 h-6 m-1 mr-4 fill-gray-500'>
-                      <path fillRule="evenodd" d="M3 2.75A2.75 2.75 0 015.75 0h14.5a.75.75 0 01.75.75v20.5a.75.75 0 01-.75.75h-6a.75.75 0 010-1.5h5.25v-4H6A1.5 1.5 0 004.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 01-.6 1.374A3.25 3.25 0 013 18.75v-16zM19.5 1.5V15H6c-.546 0-1.059.146-1.5.401V2.75c0-.69.56-1.25 1.25-1.25H19.5z"></path><path d="M7 18.25a.25.25 0 01.25-.25h5a.25.25 0 01.25.25v5.01a.25.25 0 01-.397.201l-2.206-1.604a.25.25 0 00-.294 0L7.397 23.46a.25.25 0 01-.397-.2v-5.01z"></path>
-                    </svg>
-                    <p>{results.name}</p>
-                  </a>
-                }
+                <a
+                  href={results.html_url}
+                  target='_blank' rel='noopener noreferrer'
+                  className='w-full flex items-center'
+                >
+                  {results.login ?
+                    <>
+                      <img src={results.avatar_url} alt="avatar" className='h-8 mr-4' />
+                      <p>{results.login}</p>
+                    </>
+                    :
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='w-6 h-6 m-1 mr-4 fill-gray-500'>
+                        <path fillRule="evenodd" d="M3 2.75A2.75 2.75 0 015.75 0h14.5a.75.75 0 01.75.75v20.5a.75.75 0 01-.75.75h-6a.75.75 0 010-1.5h5.25v-4H6A1.5 1.5 0 004.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 01-.6 1.374A3.25 3.25 0 013 18.75v-16zM19.5 1.5V15H6c-.546 0-1.059.146-1.5.401V2.75c0-.69.56-1.25 1.25-1.25H19.5z"></path><path d="M7 18.25a.25.25 0 01.25-.25h5a.25.25 0 01.25.25v5.01a.25.25 0 01-.397.201l-2.206-1.604a.25.25 0 00-.294 0L7.397 23.46a.25.25 0 01-.397-.2v-5.01z"></path>
+                      </svg>
+                      <p>{results.name}</p>
+                    </>
+                  }
+                </a>
               </div>
             ))
           }
