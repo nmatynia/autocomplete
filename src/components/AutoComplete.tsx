@@ -20,13 +20,14 @@ import { AxiosResponse } from 'axios';
 
 //NOTES
 // 403 is bugging the app try doing something with it - DONE
-// Repair sort() - https://www.javascripttutorial.net/array/javascript-sort-an-array-of-objects/
+// Repair sort() - DONE
 // Make using arrow a thing
 // Loading icon - DONE
-// Add user photo? Repos / Info ?
+// Add user photo? Repos / Info ? - DONE
 // Change 'a' tag placement and its style on hover, focus
 // Clicking outside is closing the dropdown
 // Make hrefs open another tab with the repo/user - DONE
+// Stroke on searched phrase ? 
 
 export const AutoComplete = () => {
 
@@ -35,6 +36,21 @@ export const AutoComplete = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null)
   const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)
+
+  // Function passed into sort() so the object can be sorted alphabetically
+  const compare = (a:any, b:any) => {
+    const _a = ((a.login ?? a.name) as string).toLowerCase()
+    const _b = ((b.login ?? b.name) as string).toLowerCase()
+    
+    if ( _a < _b ){
+      return -1;
+    }
+    if ( _a > _b ){
+      return 1;
+    }
+    return 0;
+  }
+  //
 
   //Fetching data
   const fetch = async (_search: string, pageLimit: number = 50) => {
@@ -68,7 +84,7 @@ export const AutoComplete = () => {
     }
 
     setError(null)
-    setFetchedData([...users.data.items, ...repos.data.items].sort())
+    setFetchedData([...users.data.items, ...repos.data.items].sort(compare))
   }
   //
 
