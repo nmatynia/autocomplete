@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 import { AxiosResponse } from 'axios';
+import { useDebounce } from 'use-debounce';
 
 //TODO
 // - Minimal chars number to initialize search: 3. - DONE
@@ -17,11 +18,11 @@ import { AxiosResponse } from 'axios';
 
 //NOTES
 // E2E tests
-// New Regex for searching alphabetically.
 
 export const AutoComplete = () => {
 
   const [search, setSearch] = useState<string>('')
+  const [debouncedSearch] = useDebounce<string>(search,500)
   const [fetchedData, setFetchedData] = useState<Array<any>>([])
 
   const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,7 +98,7 @@ export const AutoComplete = () => {
     return 0;
   }
   //
-  
+
   //Filter results so only the starting one will display
   const filterStartingWithSearch = (items: Array<any>) =>{
     const regex: RegExp = new RegExp('^' + search)
@@ -145,7 +146,7 @@ export const AutoComplete = () => {
 
   useEffect(() => {
     fetch(search)
-  }, [search])
+  }, [debouncedSearch])
 
 
   return (
