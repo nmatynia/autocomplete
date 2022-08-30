@@ -3,22 +3,6 @@ import axios from 'axios'
 import { AxiosResponse } from 'axios';
 import { useDebounce } from 'use-debounce';
 
-//TODO
-// - Minimal chars number to initialize search: 3. - DONE
-
-// - Result items are combined and displayed alphabetically using repository and profile name as ordering keys. - DONE
-
-// - Number of result items should be limited to 50 per request. - DONE
-
-// - The component should give visual feedback for when the data is being fetched, the results are empty, or the request resulted in an error. - DONE
-
-// - The component supports keyboard strokes (up and down arrows to browse the results, enter to open a new tab with the repository/user page). -DONE
-
-// - The solution should also display a meaningful snippet of your ability to test the code.
-
-//NOTES
-// E2E tests
-
 export const AutoComplete = () => {
 
   const [search, setSearch] = useState<string>('')
@@ -36,7 +20,7 @@ export const AutoComplete = () => {
   const [open, setOpen] = useState<boolean>(fetchedData.length > 0 || loading || !!error);
   const handleClickInput = () => setOpen(true);
 
-  //Click out of the component closes the dropdown
+  //Clicking out of the component closes the dropdown
   const clickOutsideRef = useRef<any>();
 
   useEffect(() => {
@@ -189,9 +173,11 @@ export const AutoComplete = () => {
                     </>
                     :
                     <>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='w-6 h-6 m-1 mr-4 fill-gray-500'>
-                        <path fillRule="evenodd" d="M3 2.75A2.75 2.75 0 015.75 0h14.5a.75.75 0 01.75.75v20.5a.75.75 0 01-.75.75h-6a.75.75 0 010-1.5h5.25v-4H6A1.5 1.5 0 004.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 01-.6 1.374A3.25 3.25 0 013 18.75v-16zM19.5 1.5V15H6c-.546 0-1.059.146-1.5.401V2.75c0-.69.56-1.25 1.25-1.25H19.5z"></path><path d="M7 18.25a.25.25 0 01.25-.25h5a.25.25 0 01.25.25v5.01a.25.25 0 01-.397.201l-2.206-1.604a.25.25 0 00-.294 0L7.397 23.46a.25.25 0 01-.397-.2v-5.01z"></path>
-                      </svg>
+                      <div className='w-8 h-8 mr-4 flex items-center justify-center'>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className='w-7 h-7 fill-gray-500'>
+                          <path fillRule="evenodd" d="M3 2.75A2.75 2.75 0 015.75 0h14.5a.75.75 0 01.75.75v20.5a.75.75 0 01-.75.75h-6a.75.75 0 010-1.5h5.25v-4H6A1.5 1.5 0 004.5 18v.75c0 .716.43 1.334 1.05 1.605a.75.75 0 01-.6 1.374A3.25 3.25 0 013 18.75v-16zM19.5 1.5V15H6c-.546 0-1.059.146-1.5.401V2.75c0-.69.56-1.25 1.25-1.25H19.5z"></path><path d="M7 18.25a.25.25 0 01.25-.25h5a.25.25 0 01.25.25v5.01a.25.25 0 01-.397.201l-2.206-1.604a.25.25 0 00-.294 0L7.397 23.46a.25.25 0 01-.397-.2v-5.01z"></path>
+                        </svg>
+                      </div>
                       <p dangerouslySetInnerHTML={{__html: boldString(results.name)}}></p>
                     </>
                   }
