@@ -22,7 +22,7 @@ import { useDebounce } from 'use-debounce';
 export const AutoComplete = () => {
 
   const [search, setSearch] = useState<string>('')
-  const [debouncedSearch] = useDebounce<string>(search,500)
+  const [debouncedSearch] = useDebounce<string>(search,400)
   const [fetchedData, setFetchedData] = useState<Array<any>>([])
 
   const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
