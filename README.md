@@ -1,46 +1,28 @@
-# Getting Started with Create React App
+# Github API AutoComplete 👨🏽‍💻
+![y5NKF1iJap](https://user-images.githubusercontent.com/84076941/187423923-03a581f2-d831-47bd-8dc1-1656350acc0f.gif)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Available Scripts
+## Setup
+- Install all packages and run `yarn start` if you want to load the app
+- Tests can be run using `yarn e2e:run`
 
-In the project directory, you can run:
+## Please read this before usage 🙋🏻‍♂️
+- The github API has a very low limit of 10 request per minute. I didn't authenticate my account for the safety reasons (my token would be exposed to public). Sadly unables me to use all API's power which is 50 request per minute. To prevent reaching the limit while in middle of searched phrase I used debounce hook to lower amount of requests.  
+- Usually I would decouple my code more, a great example is `fetch` function which I would throw in separate file.  
+- I decided to use E2E Cypress test for this project. Why? Because I noticed at your company's notebook that you are using Cypress on a daily basis.  
 
-### `yarn start`
+- The description of the problem that you gave me lacked few details on how you want this to work. So I made my own assumptions.  
+One of which is that this component autocompletes only after searched phrase === searched phrase can't be in the middle, only at the beginning. If that is not a intended behaviour, please have a look at this [commit](https://github.com/nmatynia/autocomplete/commit/087a7ac72e75abebdebfec9f7cf9a90d59e9de8c). This is how it looked in practice
+![app before alphabetic change](https://user-images.githubusercontent.com/84076941/187422708-d2f2f693-b683-4de0-8018-7a0d3a477f66.gif)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Tech
+- React (CRA)
+- TypeScript
+- TailwindCSS
+- Cypress
+- Axios
+- useDebounce
+-----------------
+I would gladly present this project to you, so you better understand my decision-making and problem-solving.  
+Please contact me : norbert.matyniaa@gmail.com or call me. 
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `yarn eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
