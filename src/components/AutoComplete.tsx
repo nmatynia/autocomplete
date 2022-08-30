@@ -150,7 +150,7 @@ export const AutoComplete = () => {
 
 
   return (
-    <div className="relative" ref={clickOutsideRef}>
+    <div className="relative" id='autocomplete' ref={clickOutsideRef}>
       <input
         type='text'
         placeholder='Search for Github users &#38; repos'
@@ -164,6 +164,7 @@ export const AutoComplete = () => {
       {open &&
         <div 
           onMouseMove={handleOnMouseMove}
+          id='dropdown'
           className={`absolute ${(loading || error) ? 'flex justify-center items-center' : 'overflow-y-scroll '} w-full h-auto max-h-52 overflow-hidden shadow-2xl rounded border-[1px] border-gray-200`}
         >
           {loading && <LoadingIcon />}
@@ -179,7 +180,7 @@ export const AutoComplete = () => {
                 <a
                   href={results.html_url}
                   target='_blank' rel='noopener noreferrer'
-                  className='w-full flex items-center'
+                  className='w-full flex items-center focus-visible:outline-none'
                 >
                   {results.login ?
                     <>
